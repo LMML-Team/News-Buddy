@@ -1,7 +1,3 @@
-#
-#
-#
-
 import feedparser
 import justext
 import pickle
@@ -9,18 +5,22 @@ import requests
 import sys
 
 def get_text(link):
+    """
+    """
     response = requests.get(link)
     paragraphs = justext.justext(response.content, justext.get_stoplist("English"))
     text = "\n\n".join([p.text for p in paragraphs if not p.is_boilerplate])
     return text
 
-def collect(url, filename):
+def collect(url, filename, limit):
+    """
+    """
     # read RSS feed
     d = feedparser.parse(url)
     
     # grab each article
     texts = {}
-    for entry in d["entries"]:
+    for entry in d["entries"][:limit]:
         link = entry["link"]
         print("downloading: " + link)
         text = get_text(link)
