@@ -2,24 +2,26 @@ import pickle
 from collections import Counter
 
 
-def chunks_to_db(chunks, database):
+def chunks_to_db(doc_id, chunks, database):
     """
-    Takes in chunks that represent keywords from a document and creates/updates a dictionary that associates entities
-    with keywords.
+    Takes in chunks that represent keywords from a document and updates a dictionary that associates entities
+    with keywords per document
 
     Parameters
     ----------
+    doc_id:
+        String of the document ID containing the chunks.
     chunks: iter[str]
-        Iterable of chunks from a single document.
-    database: list[Counter]
-        Existing database of list of counts of entities per each document.
+        Iterable of chunks from the document "doc_id"
+    database: defaultdict{str: list[Counter]}
+        Dictionary containing count of entities per each document
 
     Returns
     -------
-    entity_db: list[Counter]
-        Database of entities' associations.
+    entity_db: defaultdict{str: list[Counter]}
+        Dictionary containing count of entities per each document
     """
-    database.append(Counter(chunks))
+    database[doc_id].append(Counter(chunks))
 
     return database
 
@@ -49,7 +51,7 @@ def read_database(filename):
 
     Returns
     -------
-    list[Counter]:
+    defaultdict{str: list[Counter]}
         Entity database.
 
     """
@@ -64,7 +66,7 @@ def get_top_associations(entity, database, k=2):
     ----------
     entity: str
         Entity for associations to be returned.
-    database: list(Counter)
+    database: dict{str: list[Counter]}
         Database of associations between entities.
     k: int
         Number of top associations desired.
@@ -76,7 +78,7 @@ def get_top_associations(entity, database, k=2):
     """
 
     associations = Counter()
-    for counter in database:
+    for counter in database.values():
         if entity in counter.keys():
             associations.update(counter)
 
