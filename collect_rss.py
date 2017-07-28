@@ -3,10 +3,27 @@ import justext
 import pickle
 import requests
 import sys
+import os.path
+from collections import OrderedDict
+from collections import defaultdict, Counter
+import nltk
+from nltk.tokenize import word_tokenize
+import numpy as np
+import string
+import time
 
-face_data = OrderedDict()
+news_data = OrderedDict()
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
     news_data = pickle.load(f)
+
+def save():
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "face_data.pickle"), 'wb') as f:
+        pickle.dump(news_data, f, pickle.HIGHEST_PROTOCOL)
+
+def remove(link):
+    if not link in news_data:
+            raise KeyError("document with id [" + id + "] not found in index.")
+    news_data.remove(link)
 
 def get_text(link):
     """
@@ -20,6 +37,15 @@ def get_text(link):
 def collect(url, limit, filename="news.pickle"):
     """
     Saves the articles of an article into a pickle file that you can specify
+    
+    Parameters
+    ----------
+    url: str
+        url to the document
+    limit: int
+        the number of articles
+    filename: str
+        path to the pickle file
     """
     # read RSS feed
     d = feedparser.parse(url)
@@ -28,12 +54,44 @@ def collect(url, limit, filename="news.pickle"):
     texts = {}
     for entry in d["entries"][:limit]:
         link = entry["link"]
+        if not link in self.raw_text:
+            raise KeyError("document with id [" + id + "] not found in index.")
         print("downloading: " + link)
         text = get_text(link)
         texts[link] = text
     
     # pickle
     pickle.dump(texts, open(filename, "wb"))
+
+def tokenize(text):
+    """ Converts text into tokens (also called "terms" or "words").
+
+            This function should also handle normalization, e.g., lowercasing and 
+            removing punctuation.
+
+            For example, "The cat in the hat." --> ["the", "cat", "in", "the", "hat"]
+
+            Parameters
+            ----------
+            text: str
+                The string to separate into tokens.
+
+            Returns
+            -------
+            list(str)
+                A list where each element is a token.
+
+        """
+    # Hint: use NLTK's recommended word_tokenize() then filter out punctuation
+    # It uses Punkt for sentence splitting and then tokenizes each sentence.
+    # You'll notice that it's able to differentiate between an end-of-sentence period 
+    # versus a period that's part of an abbreviation (like "U.S.").
+
+    # tokenize
+    tokens = word_tokenize(text)
+
+    # lowercase and filter out punctuation (as in string.punctuation)
+    return [token.lower() for token in tokens if not token in string.punctuation]
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
