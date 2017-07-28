@@ -4,8 +4,8 @@ from collections import Counter
 
 def chunks_to_db(doc_id, chunks, database):
     """
-    Takes in chunks that represent keywords from a document and updates a dictionary that associates entities
-    with keywords per document
+    Takes in chunks that represent keywords from a document and updates a dictionary that associates
+    document IDs with a Counter of their entities.
 
     Parameters
     ----------
@@ -13,15 +13,15 @@ def chunks_to_db(doc_id, chunks, database):
         String of the document ID containing the chunks.
     chunks: iter[str]
         Iterable of chunks from the document "doc_id"
-    database: defaultdict{str: list[Counter]}
+    database: defaultdict{str: Counter}
         Dictionary containing count of entities per each document
 
     Returns
     -------
-    entity_db: defaultdict{str: list[Counter]}
+    entity_db: defaultdict{str: Counter}
         Dictionary containing count of entities per each document
     """
-    database[doc_id].append(Counter(chunks))
+    database[doc_id].update(chunks)
 
     return database
 
@@ -51,7 +51,7 @@ def read_database(filename):
 
     Returns
     -------
-    defaultdict{str: list[Counter]}
+    defaultdict{str: Counter}
         Entity database.
 
     """
@@ -66,14 +66,14 @@ def get_top_associations(entity, database, k=2):
     ----------
     entity: str
         Entity for associations to be returned.
-    database: dict{str: list[Counter]}
+    database: dict{str: Counter}
         Database of associations between entities.
     k: int
         Number of top associations desired.
 
     Returns
     -------
-    tuple[str]:
+    Tuple(str):
         Tuple of top associations with entity.
     """
 
@@ -84,3 +84,22 @@ def get_top_associations(entity, database, k=2):
 
     associations.pop(entity)
     return list(zip(*associations.most_common(k)))[0]
+
+
+def get_top_associations_document(doc_id, database, k=2):
+    """
+    Returns the top k entities from one given documents
+
+    Parameters
+    ----------
+    doc_id: str
+        Desired document ID
+    database: defaultdict{str: Counter}
+        Database of entities in document ids
+
+    Returns
+    -------
+    Tuple(str):
+        Tuple of the top k entities of a document
+    """
+    return list(database[doc_id].most_common(k))
