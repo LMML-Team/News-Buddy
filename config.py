@@ -30,23 +30,6 @@ inverted_index = defaultdict(set)
 def load():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
         news_data = pickle.load(f)
-        for link, text in news_data:
-            # tokenize
-            tokens = self.tokenize(text)
-
-            # create term vector for document (a Counter over tokens)
-            term_vector = Counter(tokens)
-
-            # store term vector for this doc id
-            term_vectors[link] = term_vector
-
-            # update inverted index by adding doc id to each term's set of ids
-            for term in term_vector.keys():
-                inverted_index[term].add(link)
-
-            # update document frequencies for terms found in this doc
-            # i.e., counts should increase by 1 for each (unique) term in term vector
-            doc_freq.update(term_vector.keys())
 
 def save():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "face_data.pickle"), 'wb') as f:
@@ -119,107 +102,6 @@ def collect(url, limit, filename="news.pickle"):
         
     # pickle
     pickle.dump(news_data, open(filename, "wb"))
-
-
-############################################
-############## organize terms ##############
-############################################
-
-def tokenize(text):
-    """ Converts text into tokens (also called "terms" or "words") and makes them lowercase.
-
-            This function should also handle normalization, e.g., lowercasing and 
-            removing punctuation.
-
-            For example, "The cat in the hat." --> ["the", "cat", "in", "the", "hat"]
-
-            Parameters
-            ----------
-            text: str
-                The string to separate into tokens.
-
-            Returns
-            -------
-            list(str)
-                A list where each element is a token.
-
-        """
-    # Hint: use NLTK's recommended word_tokenize() then filter out punctuation
-    # It uses Punkt for sentence splitting and then tokenizes each sentence.
-    # You'll notice that it's able to differentiate between an end-of-sentence period 
-    # versus a period that's part of an abbreviation (like "U.S.").
-
-    # tokenize
-    tokens = word_tokenize(text)
-
-    # lowercase and filter out punctuation (as in string.punctuation)
-    return [token.lower() for token in tokens if not token in string.punctuation]
-
-def get_matches_OR(terms):
-    """ Returns set of documents that contain at least one of the specified terms.
-
-            Parameters
-            ----------
-            terms: iterable(str)
-                An iterable of terms to match on, e.g., ["cat", "hat"].
-
-            Returns
-            -------
-            set(str)
-                A set of ids of documents that contain at least one of the term.
-        """
-    # initialize set of ids to empty set
-    ids = set()
-
-    # union ids with sets of ids matching any of the terms
-    for term in terms:
-        ids.update(inverted_index[term])
-
-    return ids
-
-def get_matches_AND(terms):
-    """ Returns set of documents that contain all of the specified terms.
-
-            Parameters
-            ----------
-            terms: iterable(str)
-                An iterable of terms to match on, e.g., ["cat", "hat"].
-
-            Returns
-            -------
-            set(str)
-                A set of ids of documents that contain each term.
-        """ 
-    # initialize set of ids to those that match first term
-    ids = inverted_index[terms[0]]
-
-    # intersect with sets of ids matching rest of terms
-    for term in terms[1:]:
-        ids = ids.intersection(inverted_index[term])
-
-        return ids
-
-def get_matches_NOT(terms):
-    """ Returns set of documents that don't contain any of the specified terms.
-
-            Parameters
-            ----------
-            terms: iterable(str)
-                An iterable of terms to avoid, e.g., ["cat", "hat"].
-
-            Returns
-            -------
-            set(str)
-                A set of ids of documents that don't contain any of the terms.
-        """
-    # initialize set of ids to all ids
-    ids = set(raw_text.keys())
-
-    # subtract ids of docs that match any of the terms
-    for term in terms:
-        ids = ids.difference(inverted_index[term])
-
-    return ids
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
