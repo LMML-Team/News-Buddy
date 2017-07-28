@@ -23,25 +23,30 @@ term_vectors = {}
 # Counter: maps term to count of how many documents contain term
 doc_freq = Counter()
 
-with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
-    news_data = pickle.load(f)
-    for link, text in news_data:
-        # tokenize
-        tokens = self.tokenize(text)
 
-        # create term vector for document (a Counter over tokens)
-        term_vector = Counter(tokens)
+# Dict[str, set]: maps term to set of ids of documents that contain term
+inverted_index = defaultdict(set)
 
-        # store term vector for this doc id
-        term_vectors[link] = term_vector
+def load():
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
+        news_data = pickle.load(f)
+        for link, text in news_data:
+            # tokenize
+            tokens = self.tokenize(text)
 
-        # update inverted index by adding doc id to each term's set of ids
-        for term in term_vector.keys():
-            inverted_index[term].add(link)
+            # create term vector for document (a Counter over tokens)
+            term_vector = Counter(tokens)
 
-        # update document frequencies for terms found in this doc
-        # i.e., counts should increase by 1 for each (unique) term in term vector
-        doc_freq.update(term_vector.keys())
+            # store term vector for this doc id
+            term_vectors[link] = term_vector
+
+            # update inverted index by adding doc id to each term's set of ids
+            for term in term_vector.keys():
+                inverted_index[term].add(link)
+
+            # update document frequencies for terms found in this doc
+            # i.e., counts should increase by 1 for each (unique) term in term vector
+            doc_freq.update(term_vector.keys())
 
 def save():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "face_data.pickle"), 'wb') as f:
@@ -89,14 +94,14 @@ def collect(url, limit, filename="news.pickle"):
     # grab each article
     for entry in d["entries"][:limit]:
         link = entry["link"]
-        if not link in raw_text:
-            raise KeyError("document with id [" + id + "] not found in index.")
+        if link in news_data.keys():
+            raise KeyError("document with id [" + id + "] found in index. No duplicate documents pls.")
         print("downloading: " + link)
         text = get_text(link)
         news_data[link] = text
         
         # tokenize
-        tokens = self.tokenize(text)
+        tokens = tokenize(text)
         
         # create term vector for document (a Counter over tokens)
         term_vector = Counter(tokens)
