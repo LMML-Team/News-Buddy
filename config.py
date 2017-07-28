@@ -14,31 +14,57 @@ import time
 # OrderDict[str, str]: map of id and raw text
 news_data = OrderedDict()
 
-# Dict[str, str]: maps document id to original/raw text
-raw_text = {}
-
-# Dict[str, Counter]: maps document id to term vector (counts of terms in document)
-term_vectors = {}
-
-# Counter: maps term to count of how many documents contain term
-doc_freq = Counter()
-
-
 # Dict[str, set]: maps term to set of ids of documents that contain term
 inverted_index = defaultdict(set)
 
 def load():
+    """
+    loads the pickle file
+    
+    """
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
         news_data = pickle.load(f)
+    return news_data
 
-def save():
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "face_data.pickle"), 'wb') as f:
-        pickle.dump(news_data, f, pickle.HIGHEST_PROTOCOL)
+def get_data(index):
+    """
+    Returns the index from news_data which is the ordered dictionary.
+    
+    Returns
+    -------
+    tuple: (str, str)
+        the first string is link
+        the second string is the document
+    """
+    return news_data.keys()[index]
 
-def remove(link):
+def save(database):
+    """
+    updates the database and uploads them to news.pickle
+    
+    Parameters
+    ----------
+    database: dict[str,]
+        the first string has to be the link
+    """
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'wb') as f:
+        pickle.dump(database, f, pickle.HIGHEST_PROTOCOL)
+
+def remove(link, database):
+    """
+    removes the article with the following link.
+    Make sure you 'save()'
+    
+    Parameters
+    ----------
+    link: str
+    
+    database: dict[str,]
+        the first string has to be the link
+    """
     if not link in news_data:
             raise KeyError("document with id [" + id + "] not found in index.")
-    news_data.remove(link)
+    database.remove(link)
 
 ####################################
 ######### getting the text #########
@@ -96,7 +122,7 @@ def collect(url, limit, filename="news.pickle"):
         for term in term_vector.keys():
             inverted_index[term].add(link)
         
-        # update document frequencies for terms found in this doc
+            # update document frequencies for terms found in this doc
         # i.e., counts should increase by 1 for each (unique) term in term vector
         doc_freq.update(term_vector.keys())
         
