@@ -10,7 +10,7 @@ def chunks_to_db(chunks, database):
     Parameters
     ----------
     chunks: iter[str]
-        Iterable of chunks from a single document
+        Iterable of chunks from a single document.
     database: list[Counter]
         Existing database of list of counts of entities per each document.
 
@@ -31,9 +31,9 @@ def store_database(database, filename="entity_db"):
     Parameters
     ----------
     database: dict
-        Entity database
+        Entity database.
     filename: str
-        Path to and file name of the desired save location
+        Path to and file name of the desired save location.
     """
     pickle.dump(database, open(filename + ".pickle", "wb"))
 
@@ -45,12 +45,40 @@ def read_database(filename):
     Parameters
     ----------
     filename: str
-        Path and file name of database save location
+        Path and file name of database save location.
 
     Returns
     -------
     list[Counter]:
-        Entity database
+        Entity database.
 
     """
     return pickle.load(open(filename, "rb"))
+
+
+def get_top_associations(entity, database, k=2):
+    """
+    Returns the top k associations for a given entity. Currently requires exact spelling and cases.
+
+    Parameters
+    ----------
+    entity: str
+        Entity for associations to be returned.
+    database: list(Counter)
+        Database of associations between entities.
+    k: int
+        Number of top associations desired.
+
+    Returns
+    -------
+    tuple[str]:
+        Tuple of top associations with entity.
+    """
+
+    associations = Counter()
+    for counter in database:
+        if entity in counter.keys():
+            associations.update(counter)
+
+    associations.pop(entity)
+    return list(zip(*associations.most_common(k)))[0]
