@@ -12,15 +12,41 @@ import numpy as np
 import string
 import time
 
-# OrderDict[]:
+# OrderDict[str, str]: map of id and raw text
 news_data = OrderedDict()
+
+# Dict[str, str]: maps document id to original/raw text
+raw_text = {}
+
+# Dict[str, Counter]: maps document id to term vector (counts of terms in document)
+term_vectors = {}
+
+# Counter: maps term to count of how many documents contain term
+doc_freq = Counter()
+
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
     news_data = pickle.load(f)
+    for link, text
+        # tokenize
+        tokens = self.tokenize(text)
+
+        # create term vector for document (a Counter over tokens)
+        term_vector = Counter(tokens)
+
+        # store term vector for this doc id
+        term_vectors[link] = term_vector
+
+        # update inverted index by adding doc id to each term's set of ids
+        for term in term_vector.keys():
+            inverted_index[term].add(link)
+
+        # update document frequencies for terms found in this doc
+        # i.e., counts should increase by 1 for each (unique) term in term vector
+        doc_freq.update(term_vector.keys())
 
 def save():
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "face_data.pickle"), 'wb') as f:
         pickle.dump(news_data, f, pickle.HIGHEST_PROTOCOL)
-    
 
 def remove(link):
     if not link in news_data:
@@ -34,6 +60,11 @@ def remove(link):
 def get_text(link):
     """
     Given an URL link, return the text for the stored article
+    
+    Parameter
+    ---------
+    link: str
+        url to document
     """
     response = requests.get(link)
     paragraphs = justext.justext(response.content, justext.get_stoplist("English"))
@@ -57,25 +88,41 @@ def collect(url, limit, filename="news.pickle"):
     d = feedparser.parse(url)
     
     # grab each article
-    texts = {}
     for entry in d["entries"][:limit]:
         link = entry["link"]
         if not link in raw_text:
             raise KeyError("document with id [" + id + "] not found in index.")
         print("downloading: " + link)
         text = get_text(link)
-        texts[link] = text
         news_data[link] = text
-    
+        
+        # tokenize
+        tokens = self.tokenize(text)
+        
+        # create term vector for document (a Counter over tokens)
+        term_vector = Counter(tokens)
+        
+        # store term vector for this doc id
+        term_vectors[link] = term_vector
+        
+        # update inverted index by adding doc id to each term's set of ids
+        for term in term_vector.keys():
+            inverted_index[term].add(link)
+        
+        # update document frequencies for terms found in this doc
+        # i.e., counts should increase by 1 for each (unique) term in term vector
+        doc_freq.update(term_vector.keys())
+        
     # pickle
-    pickle.dump(texts, open(filename, "wb"))
+    pickle.dump(news_data, open(filename, "wb"))
+
 
 ############################################
 ############## organize terms ##############
 ############################################
 
 def tokenize(text):
-    """ Converts text into tokens (also called "terms" or "words").
+    """ Converts text into tokens (also called "terms" or "words") and makes them lowercase.
 
             This function should also handle normalization, e.g., lowercasing and 
             removing punctuation.
