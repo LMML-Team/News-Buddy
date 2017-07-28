@@ -19,12 +19,10 @@ inverted_index = defaultdict(set)
 
 def load():
     """
-    loads the pickle file
-    
+    Loads the pickle file and sets news_data's value
     """
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
         news_data = pickle.load(f)
-    return news_data
 
 def get_data(index):
     """
@@ -53,7 +51,6 @@ def save(database):
 def remove(link, database):
     """
     removes the article with the following link.
-    Make sure you 'save()'
     
     Parameters
     ----------
@@ -65,6 +62,7 @@ def remove(link, database):
     if not link in news_data:
             raise KeyError("document with id [" + id + "] not found in index.")
     database.remove(link)
+    save(database)
 
 ####################################
 ######### getting the text #########
