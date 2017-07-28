@@ -5,17 +5,10 @@ import requests
 import sys
 import os.path
 from collections import OrderedDict
-from collections import defaultdict, Counter
 from nltk.tokenize import word_tokenize
-import numpy as np
-import string
-import time
 
 # OrderDict[str, str]: map of id and raw text
 news_data = OrderedDict()
-
-# Dict[str, set]: maps term to set of ids of documents that contain term
-inverted_index = defaultdict(set)
 
 def load():
     """
@@ -50,7 +43,7 @@ def save(database = news_data):
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'wb') as f:
         pickle.dump(database, f, pickle.HIGHEST_PROTOCOL)
 
-def remove(link, database):
+def remove_article(link, database=news_data):
     """
     removes the article with the following link.
     
@@ -61,9 +54,10 @@ def remove(link, database):
     database: dict[str,]
         the first string has to be the link
     """
-    if not link in news_data:
-            raise KeyError("document with id [" + id + "] not found in index.")
-    database.remove(link)
+    key = list(database.keys())
+    if link not in key:
+        raise KeyError("Document with id [" + id + "] not found in index.")
+    del database[link]
     save(database)
 
 ####################################
@@ -72,7 +66,7 @@ def remove(link, database):
 
 def get_text(link):
     """
-    Given an URL link, return the text for the stored article
+    Given an URL link, return the text for the stored article straight from the website
     
     Parameter
     ---------
@@ -84,7 +78,7 @@ def get_text(link):
     text = "\n\n".join([p.text for p in paragraphs if not p.is_boilerplate])
     return text
 
-def collect(url, limit, filename="news.pickle"):
+def collect(url, limit = 1, filename = "news.pickle"):
     """
     Saves the articles of an article into a pickle file that you can specify
     
@@ -106,7 +100,7 @@ def collect(url, limit, filename="news.pickle"):
         l = list(news_data.values())
         key = list(news_data.keys())
         if link in key:
-            raise KeyError("document with id [" + id + "] found in index. No duplicate documents pls.")
+            raise KeyError("Document with id [" + id + "] found in index. No duplicate documents pls.")
         print("downloading: " + link)
         text = get_text(link)
         news_data[link] = text
