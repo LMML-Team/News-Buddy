@@ -28,7 +28,6 @@ def get_data(index):
         the second string is the document
     """
     l = list(news_data.values())
-    print(l)
     return l[index]
 
 def save(database = news_data):
