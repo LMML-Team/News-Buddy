@@ -6,7 +6,6 @@ import sys
 import os.path
 from collections import OrderedDict
 from collections import defaultdict, Counter
-import nltk
 from nltk.tokenize import word_tokenize
 import numpy as np
 import string
@@ -26,7 +25,7 @@ doc_freq = Counter()
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "news.pickle"), 'rb') as f:
     news_data = pickle.load(f)
-    for link, text
+    for link, text in news_data:
         # tokenize
         tokens = self.tokenize(text)
 
