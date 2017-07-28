@@ -11,15 +11,15 @@ def chunks_to_db(chunks, database):
     ----------
     chunks: iter[str]
         Iterable of chunks from a single document
-    database: Counter
-        Existing database of counts of entities.
+    database: list[Counter]
+        Existing database of list of counts of entities per each document.
 
     Returns
     -------
-    entity_db: Counter
+    entity_db: list[Counter]
         Database of entities' associations.
     """
-    database.update(chunks)
+    database.append(Counter(chunks))
 
     return database
 
@@ -49,8 +49,8 @@ def read_database(filename):
 
     Returns
     -------
-    Counter:
-        Counter of the database
+    list[Counter]:
+        Entity database
 
     """
     return pickle.load(open(filename, "rb"))
