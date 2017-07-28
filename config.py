@@ -34,9 +34,11 @@ def get_data(index):
         the first string is link
         the second string is the document
     """
-    return news_data.keys()[index]
+    l = list(news_data.values())
+    print(l)
+    return l[index]
 
-def save(database):
+def save(database = news_data):
     """
     updates the database and uploads them to news.pickle
     
@@ -101,28 +103,13 @@ def collect(url, limit, filename="news.pickle"):
     # grab each article
     for entry in d["entries"][:limit]:
         link = entry["link"]
-        if link in news_data.keys():
+        l = list(news_data.values())
+        key = list(news_data.keys())
+        if link in key:
             raise KeyError("document with id [" + id + "] found in index. No duplicate documents pls.")
         print("downloading: " + link)
         text = get_text(link)
         news_data[link] = text
-        
-        # tokenize
-        tokens = tokenize(text)
-        
-        # create term vector for document (a Counter over tokens)
-        term_vector = Counter(tokens)
-        
-        # store term vector for this doc id
-        term_vectors[link] = term_vector
-        
-        # update inverted index by adding doc id to each term's set of ids
-        for term in term_vector.keys():
-            inverted_index[term].add(link)
-        
-            # update document frequencies for terms found in this doc
-        # i.e., counts should increase by 1 for each (unique) term in term vector
-        doc_freq.update(term_vector.keys())
         
     # pickle
     pickle.dump(news_data, open(filename, "wb"))
