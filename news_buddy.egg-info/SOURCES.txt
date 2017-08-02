@@ -1,0 +1,5 @@
+setup.py
+news_buddy.egg-info/PKG-INFO
+news_buddy.egg-info/SOURCES.txt
+news_buddy.egg-info/dependency_links.txt
+news_buddy.egg-info/top_level.txt
