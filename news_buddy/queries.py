@@ -7,7 +7,8 @@ import time
 import config as cf
 import entity_database as ed
 
-class MySearchEngine():
+
+class MySearchEngine:
     def __init__(self):
         # Dict[str, str]: maps document id to original/raw text
         self.raw_text = dict(cf.load)
@@ -57,7 +58,7 @@ class MySearchEngine():
         result = 0.0
         for term in tv1.keys():
             if term in tv2:
-                result += tv1[term] * tv2[term] * self.idf(term)**2
+                result += tv1[term] * tv2[term] * self.idf(term) ** 2
         return result
     
     def length(self, tv):
@@ -75,8 +76,8 @@ class MySearchEngine():
         """
         result = 0.0
         for term in tv:
-            result += (tv[term] * self.idf(term))**2
-        result = result**0.5
+            result += (tv[term] * self.idf(term)) ** 2
+        result = result ** 0.5
         return result
     
     def cosine_similarity(self, tv1, tv2):
@@ -97,12 +98,15 @@ class MySearchEngine():
         return self.dot_product(tv1, tv2) / (self.length(tv1) * self.length(tv2))
     
     def query(self, q, k=10):
-        """ Returns up to top k documents matching at least one term in query q, sorted by relevance.
+        """ Returns up to k documents matching at least one term in query q, sorted by relevance.
         
             Parameters
             ----------
             q: str
                 A string containing words to match on, e.g., "cat hat".
+            
+            k: int (default = 10)
+                Max number of documents returned
         
             Returns
             -------

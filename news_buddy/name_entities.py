@@ -16,7 +16,9 @@ def tokenize(doc):
 
     """
 
+    # Calls NLTK function to tokenize the document. Broken into individual words, cleans out punctuation
     tokens = nltk.word_tokenize(doc)
+
     return tokens
 
 
@@ -33,15 +35,19 @@ def chunk(tokens):
     NEs[list[str]]: Named entities as items in a list of strings
 
     """
+
+    # Uses NLTK function to pair each token with its Part Of Speech
     entity_list = []
     pos = nltk.pos_tag(tokens)
     named_entities_chunk = nltk.ne_chunk(pos, binary=True)
 
+    # Finds named entities in tokens, stores in list of strings
     for i in range(0, len(named_entities_chunk)):
         ents = named_entities_chunk.pop()
-        if getattr(ents, 'label', None) != None and ents.label() == "NE":
+        if getattr(ents, 'label', None) is not None and ents.label() == "NE":
             entity_list.append([ne for ne in ents])
 
+    # Combines named entity components, pulls off the POF labels
     return [' '.join(next(zip(*l))) for l in entity_list]
 
 
@@ -58,5 +64,11 @@ def add_entities(doc):
     NEs[list[str]]: Named entities as items in a list of strings
 
     """
+
+    # Calls function to tokenize the document, stores as list of strings
     tokens = tokenize(doc)
-    return (chunk(tokens))
+
+    # Calls function to find named entities in the tokens, stores as list of strings
+    chunks = chunk(tokens)
+
+    return chunks
