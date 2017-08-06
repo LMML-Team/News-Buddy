@@ -6,10 +6,11 @@ import sys
 import os.path
 from collections import OrderedDict
 from nltk.tokenize import word_tokenize
+import re
 
 # OrderDict[str, str]: map of id and raw text
 news_data = OrderedDict()
-
+string_data = ""
 def load():
     """
     Loads the pickle file and sets news_data's value
@@ -106,6 +107,33 @@ def collect(url, limit = 1, filename = "news.pickle"):
         
     # pickle
     pickle.dump(news_data, open(filename, "wb"))
+
+def collect_string(url, limit = 50, filename = "newfakenews.pickle"):
+    """
+    Saves the articles of an article into a pickle file that you can specify
+    
+    Parameters
+    ----------
+    url: str
+        url to the document
+    limit: int
+        the number of articles
+    filename: str
+        path to the pickle file
+    """
+    # read RSS feed
+    d = feedparser.parse(url)
+    li = []
+    
+    # grab each article
+    for entry in d["entries"][:limit]:
+        link = entry["link"]
+        li.append(get_text(link))
+        print("downloading: " + link)
+    string = " ".join(li)
+    re.sub('[^a-zA-Z0-9-_*.]', '', string)
+    # pickle
+    pickle.dump(string, open(filename, "wb"))
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
